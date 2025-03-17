@@ -1,7 +1,6 @@
 name: Maven Package
 
 on: [push, pull_request]
-  
 jobs:
   build:
     runs-on: ubuntu-24.04
@@ -26,6 +25,7 @@ jobs:
       - name: Set up a custom temporary directory
         run: |
           mkdir -p $GITHUB_WORKSPACE/tmp
+          chmod 777 $GITHUB_WORKSPACE/tmp
           echo "MAVEN_OPTS=-Djava.io.tmpdir=$GITHUB_WORKSPACE/tmp" >> $GITHUB_ENV
 
       - name: Debug Temporary Directory
@@ -38,7 +38,7 @@ jobs:
         id: build-with-maven
         run: |
           mvn -B package --file pom.xml
-          echo "my_jar=$(mvn help:evaluate -Dexpression=project.build.finalName -q -DforceStdout).jar" >> $GITHUB_OUTPUT
+          echo "my_jar=$(mvn help:evaluate -Dexpression=project.build.finalName -q -DforceStdout).jar" >> $GITHUB_ENV
 
       - name: Publish Test Results
         uses: EnricoMi/publish-unit-test-result-action@v2.18.0
@@ -50,4 +50,4 @@ jobs:
             target/surefire-reports/**/*.json
 
     outputs:
-      my_jar: ${{ steps.build-with-maven.outputs.my_jar }}
+      my_jar: ${{ env.my_jar }}
